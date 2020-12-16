@@ -75,5 +75,5 @@ jobs:
       if: failure()
       uses: actions/upload-artifact@master
       with:
-        name: ${{ matrix.config.name }}_results
-        path: check
+        name: ${{ matrix.config.name }}_log
+        path: scripts/.snakemake/log/
