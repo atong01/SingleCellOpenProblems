@@ -9,7 +9,7 @@ on:
 
 jobs:
   run_benchmark:
-    runs-on: ${{ matrix.config.os }}
+    runs-on: self-hosted
 
     strategy:
       fail-fast: false
