@@ -106,7 +106,12 @@ def metric(metric_name, maximize, image="openproblems"):
         @functools.wraps(func)
         def apply_metric(*args, **kwargs):
             log.debug("Running {} metric".format(func.__name__))
-            return func(*args, **kwargs)
+            result = func(*args, **kwargs)
+            try:
+                result = float(result)
+            except Exception:
+                pass
+            return result
 
         apply_metric.metadata = dict(
             metric_name=metric_name, maximize=maximize, image=image
@@ -116,13 +121,15 @@ def metric(metric_name, maximize, image="openproblems"):
     return decorator
 
 
-def dataset(dataset_name):
+def dataset(dataset_name, image="openproblems"):
     """Decorate a dataset function.
 
     Parameters
     ----------
     dataset_name : str
         Unique human readable name of the dataset
+    image : str, optional (default: "openproblems")
+        Name of the Docker image to be used for this dataset
     """
 
     def decorator(func):
@@ -131,7 +138,7 @@ def dataset(dataset_name):
             log.debug("Loading {} dataset".format(func.__name__))
             return func(*args, **kwargs)
 
-        apply_func.metadata = dict(dataset_name=dataset_name)
+        apply_func.metadata = dict(dataset_name=dataset_name, image=image)
         return apply_func
 
     return decorator
