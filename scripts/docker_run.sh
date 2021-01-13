@@ -3,4 +3,4 @@ WORKDIR=$1
 SCRIPT=$2
 ARGS=${@:3}
 cd ${WORKDIR}
-python3 $SCRIPT ${ARGS}
+PYTHONPATH=/opt/openproblems:$PYTHONPATH python3 $SCRIPT ${ARGS}

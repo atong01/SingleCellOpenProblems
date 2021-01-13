@@ -106,7 +106,12 @@ def metric(metric_name, maximize, image="openproblems"):
         @functools.wraps(func)
         def apply_metric(*args, **kwargs):
             log.debug("Running {} metric".format(func.__name__))
-            return func(*args, **kwargs)
+            result = func(*args, **kwargs)
+            try:
+                result = float(result)
+            except Exception:
+                pass
+            return result
 
         apply_metric.metadata = dict(
             metric_name=metric_name, maximize=maximize, image=image
