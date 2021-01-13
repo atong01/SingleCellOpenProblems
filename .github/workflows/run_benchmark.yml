@@ -56,20 +56,26 @@ jobs:
         snakemake -j $(grep -c processor /proc/cpuinfo) all
         cd ..
 
-    - name: Upload results on success
-      env:
-        GH_USERNAME: ${{ secrets.GH_USERNAME }}
-        GH_PASSWORD: ${{ secrets.GH_PASSWORD }}
-      run: |
-        git remote set-url origin https://${GH_USERNAME}:${GH_PASSWORD}@github.com/${GITHUB_REPOSITORY}.git
-        git checkout -B master
-        git pull origin master
-        git add results.md
-        git add website/data/results
-        git config user.name "Github Actions"
-        git config user.email "singlecellopenproblems@protonmail.com"
-        git commit -m "Update results for ${GITHUB_REF} - ci skip"
-        git push origin master
+    - name: Commit result
+      uses: EndBug/add-and-commit@v6
+      with:
+        author_name: SingleCellOpenProblems
+        author_email: singlecellopenproblems@protonmail.com
+        message: 'Push benchmarking results # ci skip'
+        add: |
+            website/data/results
+            results.json
+        branch: auto_update
+        push: false
+
+    - name: Create Pull Request
+      uses: peter-evans/create-pull-request@v3
+      with:
+        branch: auto_update
+        delete-branch: false
+        base: master
+        title: '[auto] Update results'
+        reviewers: scottgigante, dburkhardt, singlecellopenproblems
 
     - name: Upload check results on fail
       if: failure()
