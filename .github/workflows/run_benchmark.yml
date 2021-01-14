@@ -47,8 +47,9 @@ jobs:
       run: |
         python -m pip install --upgrade "pip<=21.0"
         pip install --use-deprecated=legacy-resolver -U wheel setuptools
-        pip install --use-deprecated=legacy-resolver -U .[evaluate]
-        python -c "import openproblems"
+        # pip install --use-deprecated=legacy-resolver -U .[evaluate]
+        # python -c "import openproblems"
+        pip install snakemake tibanna awscli
 
     - name: Run benchmark
       env:
@@ -57,7 +58,7 @@ jobs:
         AWS_DEFAULT_REGION: ${{ secrets.AWS_DEFAULT_REGION }}
       run: |
         git clean -fxdq
-        aws s3 sync . s3://openproblems_tibanna/
+        aws s3 sync . s3://openproblems-tibanna/
         cd scripts
         snakemake --tibanna --tibanna-sfn=tibanna_unicorn_tibanna_unicorn --default-remote-prefix=openproblems_tibanna/ all
         cd ..
