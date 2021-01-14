@@ -1,5 +1,5 @@
 import os
-import snakemake_tools as tools
+import workflow.snakemake_tools as tools
 
 rule all:
     input:
