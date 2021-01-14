@@ -56,8 +56,10 @@ jobs:
         AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         AWS_DEFAULT_REGION: ${{ secrets.AWS_DEFAULT_REGION }}
       run: |
+        git clean -fxdq
+        aws s3 cp ./* s3://openproblems_tibanna/ --recursive
         cd scripts
-        snakemake --tibanna --tibanna-sfn=tibanna_unicorn_tibanna_unicorn --default-remote-prefix=openproblems_tibanna/test all
+        snakemake --tibanna --tibanna-sfn=tibanna_unicorn_tibanna_unicorn --default-remote-prefix=openproblems_tibanna/ all
         cd ..
 
     - name: Commit result
