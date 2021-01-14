@@ -5,16 +5,17 @@ import multiprocessing
 
 N_THREADS = multiprocessing.cpu_count()
 TEMPDIR = ".evaluate"
-SCRIPTS_DIR = os.getcwd()
+SCRIPTS_DIR = "./workflow"
 DOCKER_DIR = "/opt/openproblems/scripts/"
-RESULTS_DIR = os.path.join(SCRIPTS_DIR, "..", "website", "data", "results")
+IMAGE_DIR = "docker"
+RESULTS_DIR = os.path.join("website", "data", "results")
 DOCKER_EXEC = (
     "CONTAINER=$("
     "  docker run -dt --rm"
     '  --mount type=bind,source="{mountdir}",target=/opt/openproblems'
     "  singlecellopenproblems/{{image}}"
     ") bash -c '"
-    "  docker exec $CONTAINER /bin/bash /opt/openproblems/scripts/docker_run.sh"
+    "  docker exec $CONTAINER /bin/bash /opt/openproblems/workflow/docker_run.sh"
 ).format(mountdir=os.path.dirname(SCRIPTS_DIR))
 try:
     DOCKER_PASSWORD = os.environ["DOCKER_PASSWORD"]
@@ -31,11 +32,10 @@ def tasks(wildcards):
 
 
 def _images(filename):
-    docker_dir = os.path.join("..", "docker")
     return [
-        os.path.join(docker_dir, image, filename)
-        for image in os.listdir(docker_dir)
-        if os.path.isdir(os.path.join(docker_dir, image))
+        os.path.join(IMAGE_DIR, image, filename)
+        for image in os.listdir(IMAGE_DIR)
+        if os.path.isdir(os.path.join(IMAGE_DIR, image))
     ]
 
 
@@ -116,7 +116,7 @@ def docker_image_name(wildcards):
 
 def docker_image_marker(image):
     """Get the file to be created to ensure Docker image exists from the image name."""
-    docker_path = "../docker/{}".format(image)
+    docker_path = os.path.join(IMAGE_DIR, image)
     docker_push = os.path.join(docker_path, ".docker_push")
     docker_pull = os.path.join(docker_path, ".docker_pull")
     docker_build = os.path.join(docker_path, ".docker_build")
@@ -134,13 +134,13 @@ def docker_image_marker(image):
 
 def _docker_requirements(image, include_push=False):
     """Get all files to ensure a Docker image is up to date from the image name."""
-    docker_dir = "../docker/{}/".format(image)
-    dockerfile = os.path.join(docker_dir, "Dockerfile")
+    docker_path = os.path.join(IMAGE_DIR, image)
+    dockerfile = os.path.join(docker_path, "Dockerfile")
     requirements = [dockerfile]
     requirements.extend(
         [
-            os.path.join(docker_dir, f)
-            for f in os.listdir(docker_dir)
+            os.path.join(docker_path, f)
+            for f in os.listdir(docker_path)
             if f.endswith("requirements.txt")
         ]
     )

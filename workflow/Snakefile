@@ -3,7 +3,7 @@ import snakemake_tools as tools
 
 rule all:
     input:
-        summary = "{}/../results.json".format(tools.SCRIPTS_DIR),
+        summary = "results.json",
         website = "{}/website.complete.temp".format(tools.TEMPDIR),
 
 rule website:
@@ -19,16 +19,16 @@ rule docker_build:
 
 rule summary:
     input:
-        script = "collate_all.py",
+        script = "workflow/collate_all.py",
         methods = tools.all_methods,
     params:
         dir = tools.TEMPDIR
-    output: "{}/../results.json".format(tools.SCRIPTS_DIR)
+    output: "results.json"
     shell: "python3 {input.script} {params.dir} {output}"
 
 rule collate_dataset:
     input:
-        script = "collate_dataset.py",
+        script = "workflow/collate_dataset.py",
         methods = tools.methods,
     params:
         dir = tools.TEMPDIR
@@ -39,7 +39,7 @@ rule collate_dataset:
 
 rule collate_method:
     input:
-        script = "collate_method.py",
+        script = "workflow/collate_method.py",
         meta = "{tempdir}/{task}/{dataset}/{method}.meta.json",
         metrics = tools.metrics,
     output: temp("{tempdir}/{task}/{dataset}/{method}.result.json")
@@ -50,7 +50,7 @@ rule collate_method:
 
 rule evaluate_metric:
     input:
-        script = "evaluate_metric.py",
+        script = "workflow/evaluate_metric.py",
         data = "{tempdir}/{task}/{dataset}/{method}.method.h5ad",
         docker = tools.docker_push,
     output: temp("{tempdir}/{task}/{dataset}/{method}/{metric}.metric.json")
@@ -65,7 +65,7 @@ rule evaluate_metric:
 
 rule run_method:
     input:
-        script = "run_method.py",
+        script = "workflow/run_method.py",
         data = "{tempdir}/{task}/{dataset}.data.h5ad",
         docker = tools.docker_push,
     output:
@@ -82,8 +82,8 @@ rule run_method:
 
 rule load_dataset:
     input:
-        script = "load_dataset.py",
-        code = "{}/../openproblems/version.py".format(tools.SCRIPTS_DIR),
+        script = "workflow/load_dataset.py",
+        code = "openproblems/version.py",
         docker = tools.docker_push,
     output: temp("{tempdir}/{task}/{dataset}.data.h5ad")
     params:
@@ -96,15 +96,14 @@ rule load_dataset:
 
 rule build_docker:
     input:
-        dockerfile = "../docker/{image}/Dockerfile",
+        dockerfile = "docker/{image}/Dockerfile",
         requirements = tools.docker_requirements,
     output:
-        "../docker/{image}/.docker_build"
+        "docker/{image}/.docker_build"
     params:
-        sourcedir = os.path.dirname(tools.SCRIPTS_DIR),
         user = "singlecellopenproblems"
     shell:
-        """docker build -f {input.dockerfile} -t {params.user}/{wildcards.image} .. \
+        """docker build -f {input.dockerfile} -t {params.user}/{wildcards.image} . \
         && touch {output}"""
 
 rule password_docker:
@@ -125,15 +124,15 @@ rule login_docker:
 
 rule push_docker:
     input:
-        build = "../docker/{image}/.docker_build",
+        build = "docker/{image}/.docker_build",
         login = ".docker_login",
     output:
-        "../docker/{image}/.docker_push"
+        "docker/{image}/.docker_push"
     shell:
         "docker push singlecellopenproblems/{wildcards.image} && date +%s > {output}"
 
 rule pull_docker:
     output:
-        temp("../docker/{image}/.docker_pull")
+        temp("docker/{image}/.docker_pull")
     shell:
         "docker pull singlecellopenproblems/{wildcards.image} && touch {output}"
