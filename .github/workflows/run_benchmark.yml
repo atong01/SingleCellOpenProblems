@@ -59,7 +59,7 @@ jobs:
         git clean -fxdq
         aws s3 sync --quiet --delete . s3://openproblems-tibanna/
         cd scripts
-        snakemake --tibanna --tibanna-sfn=tibanna_unicorn_tibanna_unicorn --default-remote-prefix=openproblems-tibanna/ all
+        # snakemake --tibanna --tibanna-sfn=tibanna_unicorn_tibanna_unicorn --default-remote-prefix=openproblems-tibanna/ all
         cd ..
 
     - name: Commit result
