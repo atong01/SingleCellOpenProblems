@@ -47,7 +47,7 @@ jobs:
       run: |
         python -m pip install --upgrade "pip<=21.0"
         pip install --use-deprecated=legacy-resolver -U wheel setuptools
-        pip install --use-deprecated=legacy-resolver -U --no-deps .[evaluate]
+        pip install --use-deprecated=legacy-resolver -U .[evaluate]
         python -c "import openproblems"
 
     - name: Run benchmark
