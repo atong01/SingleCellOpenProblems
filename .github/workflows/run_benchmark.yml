@@ -58,7 +58,13 @@ jobs:
       run: |
         git clean -fxdq
         aws s3 sync --quiet --delete --exclude .git . s3://openproblems-tibanna/
-        snakemake --tibanna --tibanna-sfn=tibanna_unicorn_tibanna_unicorn --default-remote-prefix=openproblems-tibanna/ all
+        snakemake \
+          --tibanna \
+          --tibanna-sfn=tibanna_unicorn_tibanna_unicorn \
+          --default-remote-prefix=openproblems-tibanna/ \
+          --container-image="singlecellopenproblems/openproblems-tibanna" \
+          --precommand="for i in $(ls -1d docker/*/ | sed 's:docker/\(.*\)/:\1:'); do docker pull singlecellopenproblems/$i; done" \
+          all
 
     - name: Commit result
       uses: EndBug/add-and-commit@v6
