@@ -57,7 +57,7 @@ jobs:
         AWS_DEFAULT_REGION: ${{ secrets.AWS_DEFAULT_REGION }}
       run: |
         git clean -fxdq
-        aws s3 sync --quiet . s3://openproblems-tibanna/
+        aws s3 sync --quiet --delete . s3://openproblems-tibanna/
         cd scripts
         snakemake --tibanna --tibanna-sfn=tibanna_unicorn_tibanna_unicorn --default-remote-prefix=openproblems_tibanna/ all
         cd ..
