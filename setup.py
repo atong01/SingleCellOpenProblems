@@ -53,7 +53,7 @@ setup(
         "test": test_requires + r_requires,
         "doc": doc_requires,
         "r": r_requires,
-        "evaluate": evaluate_requires + r_requires,
+        "evaluate": evaluate_requires,
     },
     test_suite="nose2.collector.collector",
     long_description=readme,
