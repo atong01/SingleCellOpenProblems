@@ -9,7 +9,7 @@ on:
 
 jobs:
   run_benchmark:
-    runs-on: self-hosted
+    runs-on: ${{ matrix.config.os }}
 
     strategy:
       fail-fast: false
@@ -53,7 +53,7 @@ jobs:
     - name: Run benchmark
       run: |
         cd scripts
-        snakemake -j $(grep -c processor /proc/cpuinfo) all
+        snakemake --tibanna --tibanna-sfn=tibanna_unicorn_tibanna_unicorn --default-remote-prefix=openproblems_tibanna/test all
         cd ..
 
     - name: Commit result

@@ -19,7 +19,7 @@ r_requires = [
     "anndata2ri>=1.0.6",
 ]
 
-evaluate_requires = ["snakemake"]
+evaluate_requires = ["snakemake", "tibanna"]
 
 test_requires = [
     "nose2",
