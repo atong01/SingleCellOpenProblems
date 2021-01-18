@@ -57,14 +57,18 @@ jobs:
         AWS_DEFAULT_REGION: ${{ secrets.AWS_DEFAULT_REGION }}
       run: |
         git clean -fxdq
-        aws s3 sync --quiet --delete --exclude .git . s3://openproblems-tibanna/
-        snakemake \
+        snakemake -p \
           --tibanna \
           --tibanna-sfn=tibanna_unicorn_tibanna_unicorn \
           --default-remote-prefix=openproblems-tibanna/ \
           --container-image="singlecellopenproblems/openproblems-tibanna" \
-          --precommand="for i in $(ls -1d docker/*/ | sed 's:docker/\(.*\)/:\1:'); do docker pull singlecellopenproblems/$i; done" \
-          all
+          --precommand="dockerd --data-root ./.docker & echo 'Running docker in background...'" \
+          all | \
+          tee .snakemake.log
+        cat .snakemake.log | \
+          grep "^EXECUTION ARN = " | \
+          sed 's/.*snakemake-job-//' | \
+          awk -F"-" '{system("tibanna log --sfn=tibanna_unicorn_tibanna_unicorn --job-id="$1" > .snakemake/log/tibanna_"$3".log")}'
 
     - name: Commit result
       uses: EndBug/add-and-commit@v6
