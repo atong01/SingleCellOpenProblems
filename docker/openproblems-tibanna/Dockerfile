@@ -2,7 +2,7 @@ FROM singlecellopenproblems/openproblems:latest
 
 # Install Docker
 RUN apt-get update
-RUN apt-get install -y apt-transport-https ca-certificates curl gnupg-agent software-properties-common sudo
+RUN apt-get install -y apt-transport-https ca-certificates curl gnupg-agent software-properties-common
 RUN curl -fsSL https://download.docker.com/linux/debian/gpg > key.gpg
 RUN apt-key add key.gpg
 RUN apt-key fingerprint 0EBFCD88

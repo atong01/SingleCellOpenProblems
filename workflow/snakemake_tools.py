@@ -3,7 +3,7 @@ import os
 import multiprocessing
 
 
-N_THREADS = multiprocessing.cpu_count()
+N_THREADS = 2
 TEMPDIR = ".evaluate"
 SCRIPTS_DIR = "./workflow"
 DOCKER_DIR = "/opt/openproblems/scripts/"
@@ -12,11 +12,11 @@ RESULTS_DIR = os.path.join("website", "data", "results")
 DOCKER_EXEC = (
     "CONTAINER=$("
     "  docker run -dt --rm"
-    '  --mount type=bind,source="{mountdir}",target=/opt/openproblems'
-    "  singlecellopenproblems/{{image}}"
+    '  --mount type=bind,source="$(pwd)",target=/opt/openproblems'
+    "  singlecellopenproblems/{image}"
     ") bash -c '"
     "  docker exec $CONTAINER /bin/bash /opt/openproblems/workflow/docker_run.sh"
-).format(mountdir=os.path.dirname(SCRIPTS_DIR))
+)
 try:
     DOCKER_PASSWORD = os.environ["DOCKER_PASSWORD"]
 except KeyError:
@@ -47,6 +47,11 @@ def push_images(wildcards):
 def build_images(wildcards):
     """Get Docker build timestamp for all images."""
     return _images(".docker_build")
+
+
+def pull_images(wildcards):
+    """Get Docker pull timestamp for all images."""
+    return _images(".docker_pull")
 
 
 def _method(task_name, dataset_name, method):
@@ -145,7 +150,9 @@ def _docker_requirements(image, include_push=False):
         ]
     )
     if include_push:
-        requirements.append(docker_image_marker(image))
+        marker = docker_image_marker(image)
+        if not marker.endswith(".docker_pull"):
+            requirements.append(marker)
     with open(dockerfile, "r") as handle:
         base_image = next(handle).replace("FROM ", "")
         if base_image.startswith("singlecellopenproblems"):
@@ -161,7 +168,11 @@ def docker_requirements(wildcards):
 
 def docker_push(wildcards):
     """Get the file to be created to ensure Docker image exists from wildcards."""
-    return docker_image_marker(docker_image_name(wildcards))
+    marker = docker_image_marker(docker_image_name(wildcards))
+    if marker.endswith(".docker_pull"):
+        return []
+    else:
+        return marker
 
 
 def docker_command(wildcards, output):
